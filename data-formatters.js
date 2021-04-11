@@ -95,8 +95,6 @@ export const prepareMe = data => {
   let me = {};
   if (data.users) {
     me = formatUser(data.users);
-    // Replace info from data.users.subscriptions with info from data.subscriptions
-    me.subscriptions = data.subscriptions.map(s => s.user);
   }
   return me;
 }
@@ -130,6 +128,15 @@ export const pickRequiredUsers = data => {
   // 3.4. Convert the users into an array
   return Object.values(requiredUsers);
 };
+
+const addSubscriptionInfoToUsers = (users, myData) => {
+  const subscriptionsUserIds = myData.subscriptions.map(s => s.user); // IDs of users I subscribed to
+  Object.values(users).forEach(u => {
+    if (subscriptionsUserIds.includes(u.id)) {
+      u.amISubscribed = true;
+    }
+  });
+}
 
 export const loadAndFormat = async (pageDataUrl, token) => {
   const headers = { 'Content-Type': 'application/json' };
@@ -166,6 +173,9 @@ export const loadAndFormat = async (pageDataUrl, token) => {
   if (me.id) {
     // 4. Add me to users
     users[me.id] = users[me.id] || me;
+
+    // 5. Add amISubscribed property to users
+    addSubscriptionInfoToUsers(users, myData);
   }
 
   return { me, attachments, comments, feeds, posts, users };
