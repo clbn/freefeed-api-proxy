@@ -19,7 +19,7 @@ app.get('/postpage/:postId', async request => {
 
 (async () => {
   try {
-    await app.listen(4001);
+    await app.listen(3001);
     console.log(`Server listening at http://${app.server.address().address}:${app.server.address().port}`);
   } catch (err) {
     app.log.error(err);
