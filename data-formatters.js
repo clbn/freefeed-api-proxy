@@ -21,7 +21,6 @@ export const formatAttachment = attachment => {
   }
 
   return {
-    id,
     url: imageSizes.o?.url || url,
     nameAndSize,
     src: imageSizes.t?.url || thumbnailUrl,
@@ -35,7 +34,6 @@ export const formatComment = comment => {
   if (!comment) return null;
 
   return {
-    id: comment.id,
     body: comment.body,
     authorId: comment.createdBy,
     createdAt: +comment.createdAt,
@@ -46,7 +44,6 @@ export const formatPost = post => {
   if (!post) return null;
 
   return {
-    id: post.id,
     body: post.body,
     authorId: post.createdBy,
     createdAt: +post.createdAt,
@@ -80,6 +77,18 @@ export const formatUser = (user, full) => {
   }
 
   return formattedUser;
+};
+
+const keyByIdAndMap = (items, cb) => {
+  if (!items) return null;
+
+  const result = {};
+
+  items.forEach(i => {
+    result[i.id] = cb ? cb(i) : i;
+  });
+
+  return result;
 };
 
 export const prepareMe = data => {
@@ -146,15 +155,13 @@ export const loadAndFormat = async (pageDataUrl, token) => {
   const me = prepareMe(myData);
 
   // 2. Prepare page data (except users)
-  const attachments = pageData.attachments.map(formatAttachment);
-  const comments = pageData.comments.map(formatComment);
-  const feeds = pageData.subscriptions;
-  const posts = Array.isArray(pageData.posts)
-    ? pageData.posts.map(formatPost)
-    : [ formatPost(pageData.posts) ];
+  const attachments = keyByIdAndMap(pageData.attachments, formatAttachment);
+  const comments = keyByIdAndMap(pageData.comments, formatComment);
+  const feeds = keyByIdAndMap(pageData.subscriptions);
+  const posts = keyByIdAndMap(Array.isArray(pageData.posts) ? pageData.posts : [ pageData.posts ], formatPost);
 
   // 3. Prepare users (only pick required ones)
-  const users = pickRequiredUsers(pageData).map(formatUser);
+  const users = keyByIdAndMap(pickRequiredUsers(pageData), formatUser);
 
   return { me, attachments, comments, feeds, posts, users };
 };
