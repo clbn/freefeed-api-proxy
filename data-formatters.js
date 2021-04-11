@@ -163,5 +163,10 @@ export const loadAndFormat = async (pageDataUrl, token) => {
   // 3. Prepare users (only pick required ones)
   const users = keyByIdAndMap(pickRequiredUsers(pageData), formatUser);
 
+  if (me.id) {
+    // 4. Add me to users
+    users[me.id] = users[me.id] || me;
+  }
+
   return { me, attachments, comments, feeds, posts, users };
 };
