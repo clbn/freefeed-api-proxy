@@ -69,8 +69,11 @@ export const formatUser = (user, fuller) => {
     isGone: !!user.isGone,
     isPrivate: user.isPrivate === '1',
     isProtected: user.isProtected === '1',
-    administrators: user.administrators || [],
   };
+
+  if (user.type === 'group') {
+    formattedUser.administrators = user.administrators || [];
+  }
 
   if (fuller) {
     formattedUser.description = user.description;
