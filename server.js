@@ -14,7 +14,8 @@ app.get('/userpage/:username', async request => {
 
 app.get('/postpage/:postId', async request => {
   const postId = request.params.postId;
-  return loadAndFormat(`https://freefeed.net/v2/posts/${postId}?maxComments=all`, request.headers.authorization);
+  const maxLikes = request.query.maxLikes;
+  return loadAndFormat(`https://freefeed.net/v2/posts/${postId}?maxComments=all&maxLikes=${maxLikes}`, request.headers.authorization);
 });
 
 (async () => {
