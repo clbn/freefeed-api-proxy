@@ -57,7 +57,7 @@ export const formatPost = post => {
   };
 };
 
-export const formatUser = (user, full) => {
+export const formatUser = (user, fuller) => {
   if (!user) return null;
 
   const formattedUser = {
@@ -72,7 +72,7 @@ export const formatUser = (user, full) => {
     administrators: user.administrators || [],
   };
 
-  if (full) {
+  if (fuller) {
     formattedUser.description = user.description;
   }
 
@@ -99,7 +99,7 @@ export const prepareMe = data => {
   return me;
 }
 
-export const pickRequiredUsers = data => {
+export const pickRequiredUsers = (data, chosenOne) => {
   // 3.1. Get their IDs from comments, feeds, posts and likes
   let requiredUsers = {};
   data.comments.forEach(c => { requiredUsers[c.createdBy] = 'c'; });
@@ -114,19 +114,24 @@ export const pickRequiredUsers = data => {
   // 3.2. Get required users from data.users
   data.users.forEach(u => {
     if (requiredUsers[u.id]) {
-      requiredUsers[u.id] = u;
+      requiredUsers[u.id] = formatUser(u);
+    }
+
+    // Usually the userpage's user is already in requiredUsers, added via the posts (in 3.1 above),
+    // but if it's a private page, data.posts might be empty, so we need to add it to requiredUsers separately.
+    if (u.username === chosenOne) {
+      requiredUsers[u.id] = formatUser(u, true);
     }
   });
 
   // 3.3. Get the rest of required users from data.subscribers
   data.subscribers.forEach(u => {
     if (requiredUsers[u.id] && !requiredUsers[u.id].id) {
-      requiredUsers[u.id] = u;
+      requiredUsers[u.id] = formatUser(u);
     }
   });
 
-  // 3.4. Convert the users into an array
-  return Object.values(requiredUsers);
+  return requiredUsers;
 };
 
 const addSubscriptionInfoToUsers = (users, myData) => {
@@ -138,7 +143,7 @@ const addSubscriptionInfoToUsers = (users, myData) => {
   });
 }
 
-export const loadAndFormat = async (pageDataUrl, token) => {
+export const loadAndFormat = async (pageDataUrl, token, chosenOne) => {
   const headers = { 'Content-Type': 'application/json' };
   if (token) {
     headers['Authorization'] = token;
@@ -168,7 +173,7 @@ export const loadAndFormat = async (pageDataUrl, token) => {
   const posts = keyByIdAndMap(Array.isArray(pageData.posts) ? pageData.posts : [ pageData.posts ], formatPost);
 
   // 3. Prepare users (only pick required ones)
-  const users = keyByIdAndMap(pickRequiredUsers(pageData), formatUser);
+  const users = pickRequiredUsers(pageData, chosenOne);
 
   if (me.id) {
     // 4. Add me to users

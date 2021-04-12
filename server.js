@@ -9,7 +9,7 @@ app.get('/homepage', async request => {
 
 app.get('/userpage/:username', async request => {
   const username = request.params.username;
-  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}?offset=0`, request.headers.authorization);
+  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}?offset=0`, request.headers.authorization, username);
 });
 
 app.get('/postpage/:postId', async request => {
