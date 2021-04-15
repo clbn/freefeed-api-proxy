@@ -1,7 +1,12 @@
 import fastify from 'fastify';
+import fastifyCors from 'fastify-cors';
 import { loadAndFormat } from './data-formatters.js';
 
 const app = fastify();
+
+app.register(fastifyCors, {
+  origin: true, // reflect the request origin
+});
 
 app.get('/homepage', async request => {
   return loadAndFormat(`https://freefeed.net/v2/timelines/home?offset=0`, request.headers.authorization);

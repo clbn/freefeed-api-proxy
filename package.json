@@ -7,6 +7,7 @@
   "type": "module",
   "dependencies": {
     "fastify": "^3.14.2",
+    "fastify-cors": "^5.2.0",
     "isomorphic-unfetch": "^3.1.0"
   }
 }
