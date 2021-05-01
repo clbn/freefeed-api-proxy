@@ -33,11 +33,18 @@ export const formatAttachment = attachment => {
 export const formatComment = comment => {
   if (!comment) return null;
 
-  return {
+  const formattedComment = {
     body: comment.body,
     authorId: comment.createdBy,
     createdAt: +comment.createdAt,
+    seqNumber: comment.seqNumber,
   };
+
+  if (comment.hideType) formattedComment.hideType = comment.hideType;
+  if (comment.likes) formattedComment.likes = comment.likes;
+  if (comment.hasOwnLike) formattedComment.haveILiked = comment.hasOwnLike;
+
+  return formattedComment;
 };
 
 export const formatPost = post => {
@@ -53,6 +60,7 @@ export const formatPost = post => {
     omittedLikes: +post.omittedLikes,
     commentIds: post.comments,
     omittedComments: +post.omittedComments,
+    omittedCommentLikes: +post.omittedCommentLikes,
     areCommentsDisabled: post.commentsDisabled === '1',
   };
 };
