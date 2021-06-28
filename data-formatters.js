@@ -85,6 +85,12 @@ export const formatUser = (user, fuller) => {
 
   if (fuller) {
     formattedUser.description = user.description;
+
+    formattedUser.statistics = Object.fromEntries(
+      Object.entries(user.statistics).map(
+        ([k, v]) => [k, +v] // convert each value in user.statistics into a number
+      )
+    );
   }
 
   return formattedUser;
