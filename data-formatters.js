@@ -81,6 +81,10 @@ export const formatUser = (user, fuller) => {
 
   if (user.type === 'group') {
     formattedUser.administrators = user.administrators || [];
+
+    if (user.isRestricted === '1') {
+      formattedUser.isRestricted = true;
+    }
   }
 
   if (fuller) {
