@@ -12,12 +12,14 @@ app.register(fastifyCors, {
 app.register(fastifyCompress, { encodings: ['gzip'] }); // gzip is twice faster than br on this low-end server
 
 app.get('/homepage', async request => {
-  return loadAndFormat(`https://freefeed.net/v2/timelines/home?offset=0`, request.headers.authorization);
+  const offset = +request.query.offset || 0;
+  return loadAndFormat(`https://freefeed.net/v2/timelines/home?offset=${offset}`, request.headers.authorization);
 });
 
 app.get('/userpage/:username', async request => {
   const username = request.params.username;
-  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}?offset=0`, request.headers.authorization, username);
+  const offset = +request.query.offset || 0;
+  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}?offset=${offset}`, request.headers.authorization, username);
 });
 
 app.get('/postpage/:postId', async request => {
