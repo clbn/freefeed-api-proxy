@@ -3,10 +3,10 @@ import fetch from 'isomorphic-unfetch';
 export const formatAttachment = attachment => {
   if (!attachment) return null;
 
-  const { id, mediaType, fileName, fileSize, imageSizes, thumbnailUrl, url } = attachment;
+  const { mediaType, fileName, fileSize, imageSizes, thumbnailUrl, url } = attachment;
 
   if (mediaType !== 'image') {
-    return { id, mediaType, url };
+    return { mediaType, fileName, fileSize, url };
   }
 
   const formattedFileSize = fileSize; // TODO: numeral(fileSize).format('0.[0] b');
@@ -21,6 +21,7 @@ export const formatAttachment = attachment => {
   }
 
   return {
+    mediaType,
     url: imageSizes.o?.url || url,
     nameAndSize,
     src: imageSizes.t?.url || thumbnailUrl,
