@@ -1,15 +1,17 @@
 import fastify from 'fastify';
-import fastifyCors from 'fastify-cors';
-import fastifyCompress from 'fastify-compress';
+import fastifyCors from '@fastify/cors';
+import fastifyCompress from '@fastify/compress';
 import { loadAndFormat } from './data-formatters.js';
 
 const app = fastify();
 
-app.register(fastifyCors, {
+await app.register(fastifyCors, {
   origin: true, // reflect the request origin
 });
 
-app.register(fastifyCompress, { encodings: ['gzip'] }); // gzip is twice faster than br on this low-end server
+await app.register(fastifyCompress, {
+  encodings: ['gzip'], // gzip is twice faster than br on this low-end server
+});
 
 app.get('/homepage', async request => {
   const offset = +request.query.offset || 0;
@@ -30,7 +32,7 @@ app.get('/postpage/:postId', async request => {
 
 (async () => {
   try {
-    await app.listen(3001);
+    await app.listen({ port: 3001 });
     console.log(`Server listening at http://${app.server.address().address}:${app.server.address().port}`);
   } catch (err) {
     app.log.error(err);
