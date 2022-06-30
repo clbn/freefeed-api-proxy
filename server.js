@@ -24,6 +24,18 @@ app.get('/userpage/:username', async request => {
   return loadAndFormat(`https://freefeed.net/v2/timelines/${username}?offset=${offset}`, request.headers.authorization, username);
 });
 
+app.get('/usercommentspage/:username', async request => {
+  const username = request.params.username;
+  const offset = +request.query.offset || 0;
+  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}/comments?offset=${offset}`, request.headers.authorization, username);
+});
+
+app.get('/userlikespage/:username', async request => {
+  const username = request.params.username;
+  const offset = +request.query.offset || 0;
+  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}/likes?offset=${offset}`, request.headers.authorization, username);
+});
+
 app.get('/postpage/:postId', async request => {
   const postId = request.params.postId;
   const maxLikes = request.query.maxLikes;
