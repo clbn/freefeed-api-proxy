@@ -18,6 +18,16 @@ app.get('/homepage', async request => {
   return loadAndFormat(`https://freefeed.net/v2/timelines/home?offset=${offset}`, request.headers.authorization);
 });
 
+app.get('/discussionspage', async request => {
+  const offset = +request.query.offset || 0;
+  return loadAndFormat(`https://freefeed.net/v2/timelines/filter/discussions?with-my-posts=yes&offset=${offset}`, request.headers.authorization);
+});
+
+app.get('/directspage', async request => {
+  const offset = +request.query.offset || 0;
+  return loadAndFormat(`https://freefeed.net/v2/timelines/filter/directs?offset=${offset}`, request.headers.authorization);
+});
+
 app.get('/userpage/:username', async request => {
   const username = request.params.username;
   const offset = +request.query.offset || 0;
