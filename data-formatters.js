@@ -165,7 +165,7 @@ const addSubscriptionInfoToUsers = (users, myData) => {
   });
 }
 
-export const loadAndFormat = async (pageDataUrl, token, chosenOne) => {
+export const loadAndFormat = async (pageDataUrl, token, username, postId) => {
   const headers = { 'Content-Type': 'application/json' };
   if (token) {
     headers['Authorization'] = token;
@@ -181,12 +181,27 @@ export const loadAndFormat = async (pageDataUrl, token, chosenOne) => {
     pageResponse.json(),
   ]);
 
-  if (!pageResponse.ok) {
-    throw new Error(pageData.err);
-  }
-
   // 1. Prepare me
   const me = prepareMe(myData);
+
+  // 1.5. Return early on failure
+  if (!pageResponse.ok) {
+    // Userpage response failed (we receive 404 and send 200)
+    if (username) {
+      const users = me.id ? { [me.id]: me } : {};
+      return { me, attachments: {}, comments: {}, feeds: {}, posts: {}, users };
+    }
+
+    // Postpage response failed (we receive 403/404/other and send 200)
+    if (postId) {
+      const posts = { [postId]: { errorCode: pageResponse.status, errorMessage: pageData.err } };
+      const users = me.id ? { [me.id]: me } : {};
+      return { me, attachments: {}, comments: {}, feeds: {}, posts, users };
+    }
+
+    // Other failures (we send 500)
+    throw new Error(pageData.err);
+  }
 
   // 2. Prepare page data (except users)
   const attachments = keyByIdAndMap(pageData.attachments, formatAttachment);
@@ -195,7 +210,7 @@ export const loadAndFormat = async (pageDataUrl, token, chosenOne) => {
   const posts = keyByIdAndMap(Array.isArray(pageData.posts) ? pageData.posts : [ pageData.posts ], formatPost);
 
   // 3. Prepare users (only pick required ones)
-  const users = pickRequiredUsers(pageData, chosenOne);
+  const users = pickRequiredUsers(pageData, username);
 
   if (me.id) {
     // 4. Add me to users
