@@ -52,6 +52,7 @@ export const formatPost = post => {
   if (!post) return null;
 
   return {
+    shortId: post.shortId,
     body: post.body,
     authorId: post.createdBy,
     createdAt: +post.createdAt,
