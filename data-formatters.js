@@ -1,5 +1,7 @@
 import fetch from 'isomorphic-unfetch';
 
+import { config } from './config.js';
+
 export const formatAttachment = attachment => {
   if (!attachment) return null;
 
@@ -174,7 +176,7 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId) => {
   }
 
   const [myResponse, pageResponse] = await Promise.all([
-    fetch(`https://freefeed.net/v2/users/whoami`, { headers }),
+    fetch(`${config.api.host}/v2/users/whoami`, { headers }),
     fetch(pageDataUrl, { headers }),
   ]);
 

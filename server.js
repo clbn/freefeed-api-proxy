@@ -1,6 +1,8 @@
 import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyCompress from '@fastify/compress';
+
+import { config } from './config.js';
 import { loadAndFormat } from './data-formatters.js';
 
 const app = fastify();
@@ -15,47 +17,47 @@ await app.register(fastifyCompress, {
 
 app.get('/homepage', async request => {
   const offset = +request.query.offset || 0;
-  return loadAndFormat(`https://freefeed.net/v2/timelines/home?offset=${offset}`, request.headers.authorization);
+  return loadAndFormat(`${config.api.host}/v2/timelines/home?offset=${offset}`, request.headers.authorization);
 });
 
 app.get('/searchpage', async request => {
   const q = request.query.q;
   const offset = +request.query.offset || 0;
-  return loadAndFormat(`https://freefeed.net/v2/search?qs=${encodeURIComponent(q)}&offset=${offset}`, request.headers.authorization);
+  return loadAndFormat(`${config.api.host}/v2/search?qs=${encodeURIComponent(q)}&offset=${offset}`, request.headers.authorization);
 });
 
 app.get('/discussionspage', async request => {
   const offset = +request.query.offset || 0;
-  return loadAndFormat(`https://freefeed.net/v2/timelines/filter/discussions?with-my-posts=yes&offset=${offset}`, request.headers.authorization);
+  return loadAndFormat(`${config.api.host}/v2/timelines/filter/discussions?with-my-posts=yes&offset=${offset}`, request.headers.authorization);
 });
 
 app.get('/directspage', async request => {
   const offset = +request.query.offset || 0;
-  return loadAndFormat(`https://freefeed.net/v2/timelines/filter/directs?offset=${offset}`, request.headers.authorization);
+  return loadAndFormat(`${config.api.host}/v2/timelines/filter/directs?offset=${offset}`, request.headers.authorization);
 });
 
 app.get('/userpage/:username', async request => {
   const username = request.params.username;
   const offset = +request.query.offset || 0;
-  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}?offset=${offset}`, request.headers.authorization, username);
+  return loadAndFormat(`${config.api.host}/v2/timelines/${username}?offset=${offset}`, request.headers.authorization, username);
 });
 
 app.get('/usercommentspage/:username', async request => {
   const username = request.params.username;
   const offset = +request.query.offset || 0;
-  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}/comments?offset=${offset}`, request.headers.authorization, username);
+  return loadAndFormat(`${config.api.host}/v2/timelines/${username}/comments?offset=${offset}`, request.headers.authorization, username);
 });
 
 app.get('/userlikespage/:username', async request => {
   const username = request.params.username;
   const offset = +request.query.offset || 0;
-  return loadAndFormat(`https://freefeed.net/v2/timelines/${username}/likes?offset=${offset}`, request.headers.authorization, username);
+  return loadAndFormat(`${config.api.host}/v2/timelines/${username}/likes?offset=${offset}`, request.headers.authorization, username);
 });
 
 app.get('/postpage/:postId', async request => {
   const postId = request.params.postId;
   const maxLikes = request.query.maxLikes;
-  return loadAndFormat(`https://freefeed.net/v2/posts/${postId}?maxComments=all&maxLikes=${maxLikes}`, request.headers.authorization, null, postId);
+  return loadAndFormat(`${config.api.host}/v2/posts/${postId}?maxComments=all&maxLikes=${maxLikes}`, request.headers.authorization, null, postId);
 });
 
 (async () => {
