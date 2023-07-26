@@ -64,6 +64,7 @@ export const formatPost = post => {
     omittedComments: +post.omittedComments,
     omittedCommentLikes: +post.omittedCommentLikes,
     areCommentsDisabled: post.commentsDisabled === '1',
+    backlinksCount: +post.backlinksCount,
   };
 };
 
