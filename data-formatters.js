@@ -169,7 +169,7 @@ const addSubscriptionInfoToUsers = (users, myData) => {
   });
 }
 
-export const loadAndFormat = async (pageDataUrl, token, username, postId) => {
+export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe) => {
   const headers = { 'Content-Type': 'application/json' };
   if (token) {
     headers['Authorization'] = token;
@@ -177,7 +177,7 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId) => {
 
   const [myResponse, pageResponse] = await Promise.all([
     fetch(`${config.api.host}/v2/users/whoami`, { headers }),
-    fetch(pageDataUrl, { headers }),
+    justMe ? { json: () => null } : fetch(pageDataUrl, { headers }),
   ]);
 
   const [myData, pageData] = await Promise.all([
@@ -190,8 +190,9 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId) => {
 
   // 1.5. Return early on failure
   if (!pageResponse.ok) {
-    // Userpage response failed (we receive 404 and send 200)
-    if (username) {
+    // Userpage response failed (we receive 404 and send 200), or
+    // Didn't proxy the page data but still send `me`
+    if (username || justMe) {
       const users = me.id ? { [me.id]: me } : {};
       return { me, attachments: {}, comments: {}, feeds: {}, posts: {}, users };
     }

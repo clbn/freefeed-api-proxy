@@ -23,7 +23,7 @@ app.get('/homepage', async request => {
 app.get('/searchpage', async request => {
   const q = request.query.q;
   const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v2/search?qs=${encodeURIComponent(q)}&offset=${offset}`, request.headers.authorization);
+  return loadAndFormat(`${config.api.host}/v2/search?qs=${encodeURIComponent(q)}&offset=${offset}`, request.headers.authorization, null, null, !q);
 });
 
 app.get('/discussionspage', async request => {
