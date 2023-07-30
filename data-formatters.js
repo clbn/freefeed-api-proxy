@@ -28,8 +28,10 @@ export const formatAttachment = attachment => {
     nameAndSize,
     src: imageSizes.t?.url || thumbnailUrl,
     srcSet,
-    width: imageSizes.t?.w || imageSizes.o?.w || null,
-    height: imageSizes.t?.h || imageSizes.o?.h || null,
+    tw: +imageSizes.t?.w || +imageSizes.o?.w || null,
+    th: +imageSizes.t?.h || +imageSizes.o?.h || null,
+    ow: +imageSizes.o?.w || null,
+    oh: +imageSizes.o?.h || null,
   };
 };
 
