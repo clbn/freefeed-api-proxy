@@ -39,6 +39,7 @@ export const formatComment = comment => {
   if (!comment) return null;
 
   const formattedComment = {
+    shortId: comment.shortId,
     body: comment.body,
     authorId: comment.createdBy,
     createdAt: +comment.createdAt,
