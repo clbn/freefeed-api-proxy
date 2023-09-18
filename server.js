@@ -60,6 +60,12 @@ app.get('/postpage/:postId', async request => {
   return loadAndFormat(`${config.api.host}/v2/posts/${postId}?maxComments=all&maxLikes=${maxLikes}`, request.headers.authorization, null, postId);
 });
 
+app.get('/postbacklinkspage/:postId', async request => {
+  const postId = request.params.postId;
+  const offset = +request.query.offset || 0;
+  return loadAndFormat(`${config.api.host}/v2/posts/${postId}/backlinks?offset=${offset}`, request.headers.authorization);
+});
+
 (async () => {
   try {
     await app.listen({ host: '0.0.0.0', port: process.env.PORT || 3000 });
