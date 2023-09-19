@@ -73,7 +73,7 @@ export const formatPost = post => {
   };
 };
 
-export const formatUser = (user, fuller) => {
+export const formatUser = (user, stats) => {
   if (!user) return null;
 
   const formattedUser = {
@@ -95,12 +95,12 @@ export const formatUser = (user, fuller) => {
     }
   }
 
-  if (fuller) {
+  if (stats) {
     formattedUser.description = user.description;
 
     formattedUser.statistics = Object.fromEntries(
-      Object.entries(user.statistics).map(
-        ([k, v]) => [k, +v] // convert each value in user.statistics into a number
+      Object.entries(stats).map(
+        ([k, v]) => [k, +v] // convert each value into a number
       )
     );
   }
@@ -128,7 +128,7 @@ export const prepareMe = data => {
   return me;
 }
 
-export const pickRequiredUsers = (data, chosenOne) => {
+export const pickRequiredUsers = (data, chosenOne, stats) => {
   // 3.1. Get their IDs from comments, feeds, posts and likes
   let requiredUsers = {};
   data.comments.forEach(c => { requiredUsers[c.createdBy] = 'c'; });
@@ -149,7 +149,7 @@ export const pickRequiredUsers = (data, chosenOne) => {
     // Usually the userpage's user is already in requiredUsers, added via the posts (in 3.1 above),
     // but if it's a private page, data.posts might be empty, so we need to add it to requiredUsers separately.
     if (u.username === chosenOne) {
-      requiredUsers[u.id] = formatUser(u, true);
+      requiredUsers[u.id] = formatUser(u, stats);
     }
   });
 
@@ -178,13 +178,15 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
     headers['Authorization'] = token;
   }
 
-  const [myResponse, pageResponse] = await Promise.all([
+  const [myResponse, statResponse, pageResponse] = await Promise.all([
     fetch(`${config.api.host}/v2/users/whoami`, { headers }),
+    username ? fetch(`${config.api.host}/v2/users/${username}/statistics`, { headers }) : { json: () => null },
     justMe ? { json: () => null } : fetch(pageDataUrl, { headers }),
   ]);
 
-  const [myData, pageData] = await Promise.all([
+  const [myData, statData, pageData] = await Promise.all([
     myResponse.json(),
+    statResponse.json(),
     pageResponse.json(),
   ]);
 
@@ -218,7 +220,7 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
   const posts = keyByIdAndMap(Array.isArray(pageData.posts) ? pageData.posts : [ pageData.posts ], formatPost);
 
   // 3. Prepare users (only pick required ones)
-  const users = pickRequiredUsers(pageData, username);
+  const users = pickRequiredUsers(pageData, username, statData?.statistics);
 
   if (me.id) {
     // 4. Add me to users
