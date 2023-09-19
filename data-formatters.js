@@ -2,6 +2,10 @@ import fetch from 'isomorphic-unfetch';
 
 import { config } from './config.js';
 
+const sanitizeDisplayName = name => name
+  .replace(/[\u180E\u2000-\u200F\u2060\u2800\u3000\u3164\u{1D159}]/gu, '') // remove invisible characters
+  .trim();
+
 export const formatAttachment = attachment => {
   if (!attachment) return null;
 
@@ -80,7 +84,7 @@ export const formatUser = (user, stats) => {
     id: user.id,
     username: user.username,
     type: user.type, // 'user' or 'group'
-    displayName: user.screenName,
+    displayName: sanitizeDisplayName(user.screenName) || user.username,
     userpicUrl: user.profilePictureLargeUrl,
     isGone: !!user.isGone,
     isPrivate: user.isPrivate === '1',
