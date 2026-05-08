@@ -71,6 +71,12 @@ export const formatPost = post => {
     omittedLikes: +post.omittedLikes,
     commentIds: post.comments,
     omittedComments: +post.omittedComments,
+
+    // We'll omit omittedCommentsOffset here. We'll assume it's always 1 when
+    // folded, because the freefeed-server's `headComments` config is 1.
+    // Clients can assume `commentIds[0]` is the head and the rest are the tail.
+    // omittedCommentsOffset: +post.omittedCommentsOffset,
+
     omittedCommentLikes: +post.omittedCommentLikes,
     areCommentsDisabled: post.commentsDisabled === '1',
     backlinksCount: +post.backlinksCount,
@@ -183,8 +189,8 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
   }
 
   const [myResponse, statResponse, pageResponse] = await Promise.all([
-    fetch(`${config.api.host}/v2/users/whoami`, { headers }),
-    username ? fetch(`${config.api.host}/v2/users/${username}/statistics`, { headers }) : { json: () => null },
+    fetch(`${config.api.host}/v3/users/whoami`, { headers }),
+    username ? fetch(`${config.api.host}/v3/users/${username}/statistics`, { headers }) : { json: () => null },
     justMe ? { json: () => null } : fetch(pageDataUrl, { headers }),
   ]);
 
