@@ -1,77 +1,62 @@
-import fastify from 'fastify';
-import fastifyCors from '@fastify/cors';
-import fastifyCompress from '@fastify/compress';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 
 import { config } from './config.js';
 import { loadAndFormat } from './data-formatters.js';
 
-const app = fastify();
+const app = new Hono();
 
-await app.register(fastifyCors, {
-  origin: true, // reflect the request origin
+app.use('*', cors());
+
+app.get('/homepage', async ({ req }) => {
+  const offset = +req.query('offset') || 0;
+  return loadAndFormat(`${config.api.host}/v3/timelines/home?offset=${offset}`, req.header('authorization'));
 });
 
-await app.register(fastifyCompress, {
-  encodings: ['gzip'], // gzip is twice faster than br on this low-end server
+app.get('/searchpage', async ({ req }) => {
+  const q = req.query('q');
+  const offset = +req.query('offset') || 0;
+  return loadAndFormat(`${config.api.host}/v3/search?qs=${encodeURIComponent(q)}&offset=${offset}`, req.header('authorization'), null, null, !q);
 });
 
-app.get('/homepage', async request => {
-  const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v3/timelines/home?offset=${offset}`, request.headers.authorization);
+app.get('/discussionspage', async ({ req }) => {
+  const offset = +req.query('offset') || 0;
+  return loadAndFormat(`${config.api.host}/v3/timelines/filter/discussions?with-my-posts=yes&offset=${offset}`, req.header('authorization'));
 });
 
-app.get('/searchpage', async request => {
-  const q = request.query.q;
-  const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v3/search?qs=${encodeURIComponent(q)}&offset=${offset}`, request.headers.authorization, null, null, !q);
+app.get('/directspage', async ({ req }) => {
+  const offset = +req.query('offset') || 0;
+  return loadAndFormat(`${config.api.host}/v3/timelines/filter/directs?offset=${offset}`, req.header('authorization'));
 });
 
-app.get('/discussionspage', async request => {
-  const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v3/timelines/filter/discussions?with-my-posts=yes&offset=${offset}`, request.headers.authorization);
+app.get('/userpage/:username', async ({ req }) => {
+  const username = req.param('username');
+  const offset = +req.query('offset') || 0;
+  return loadAndFormat(`${config.api.host}/v3/timelines/${username}?offset=${offset}`, req.header('authorization'), username);
 });
 
-app.get('/directspage', async request => {
-  const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v3/timelines/filter/directs?offset=${offset}`, request.headers.authorization);
+app.get('/usercommentspage/:username', async ({ req }) => {
+  const username = req.param('username');
+  const offset = +req.query('offset') || 0;
+  return loadAndFormat(`${config.api.host}/v3/timelines/${username}/comments?offset=${offset}`, req.header('authorization'), username);
 });
 
-app.get('/userpage/:username', async request => {
-  const username = request.params.username;
-  const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v3/timelines/${username}?offset=${offset}`, request.headers.authorization, username);
+app.get('/userlikespage/:username', async ({ req }) => {
+  const username = req.param('username');
+  const offset = +req.query('offset') || 0;
+  return loadAndFormat(`${config.api.host}/v3/timelines/${username}/likes?offset=${offset}`, req.header('authorization'), username);
 });
 
-app.get('/usercommentspage/:username', async request => {
-  const username = request.params.username;
-  const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v3/timelines/${username}/comments?offset=${offset}`, request.headers.authorization, username);
+app.get('/postpage/:postId', async ({ req }) => {
+  const postId = req.param('postId');
+  const maxLikes = req.query('maxLikes');
+  return loadAndFormat(`${config.api.host}/v3/posts/${postId}?maxComments=all&maxLikes=${maxLikes}`, req.header('authorization'), null, postId);
 });
 
-app.get('/userlikespage/:username', async request => {
-  const username = request.params.username;
-  const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v3/timelines/${username}/likes?offset=${offset}`, request.headers.authorization, username);
+app.get('/postbacklinkspage/:postId', async ({ req }) => {
+  const postId = req.param('postId');
+  const offset = +req.query('offset') || 0;
+  return loadAndFormat(`${config.api.host}/v3/posts/${postId}/backlinks?offset=${offset}`, req.header('authorization'));
 });
 
-app.get('/postpage/:postId', async request => {
-  const postId = request.params.postId;
-  const maxLikes = request.query.maxLikes;
-  return loadAndFormat(`${config.api.host}/v3/posts/${postId}?maxComments=all&maxLikes=${maxLikes}`, request.headers.authorization, null, postId);
-});
-
-app.get('/postbacklinkspage/:postId', async request => {
-  const postId = request.params.postId;
-  const offset = +request.query.offset || 0;
-  return loadAndFormat(`${config.api.host}/v3/posts/${postId}/backlinks?offset=${offset}`, request.headers.authorization);
-});
-
-(async () => {
-  try {
-    await app.listen({ host: '0.0.0.0', port: process.env.PORT || 3000 });
-    console.log(`Server listening at http://${app.server.address().address}:${app.server.address().port}`);
-  } catch (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
-})();
+export default app;

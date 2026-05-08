@@ -5,10 +5,17 @@
   "author": "Alex Olshansky <alex@creagenics.com>",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
   "dependencies": {
-    "fastify": "^4.1.0",
-    "@fastify/compress": "^6.1.0",
-    "@fastify/cors": "^8.0.0",
-    "isomorphic-unfetch": "^3.1.0"
+    "hono": "^4.12.18"
+  },
+  "devDependencies": {
+    "wrangler": "^4.90.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp", "workerd"]
   }
 }

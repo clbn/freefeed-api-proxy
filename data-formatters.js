@@ -1,5 +1,3 @@
-import fetch from 'isomorphic-unfetch';
-
 import { config } from './config.js';
 
 const sanitizeDisplayName = name => name
@@ -209,14 +207,14 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
     // Didn't proxy the page data but still send `me`
     if (username || justMe) {
       const users = me.id ? { [me.id]: me } : {};
-      return { me, attachments: {}, comments: {}, feeds: {}, posts: {}, users };
+      return Response.json({ me, attachments: {}, comments: {}, feeds: {}, posts: {}, users });
     }
 
     // Postpage response failed (we receive 403/404/other and send 200)
     if (postId) {
       const posts = { [postId]: { errorCode: pageResponse.status, errorMessage: pageData.err } };
       const users = me.id ? { [me.id]: me } : {};
-      return { me, attachments: {}, comments: {}, feeds: {}, posts, users };
+      return Response.json({ me, attachments: {}, comments: {}, feeds: {}, posts, users });
     }
 
     // Other failures (we send 500)
@@ -240,5 +238,5 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
     addSubscriptionInfoToUsers(users, myData);
   }
 
-  return { me, attachments, comments, feeds, posts, users };
+  return Response.json({ me, attachments, comments, feeds, posts, users });
 };
