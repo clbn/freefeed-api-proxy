@@ -238,5 +238,12 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
     addSubscriptionInfoToUsers(users, myData);
   }
 
-  return Response.json({ me, attachments, comments, feeds, posts, users });
+  // 6. Add the active timeline for realtime subscriptions
+  // Clients use this to subscribe to realtime `timeline:<id>` rooms.
+  // Feed endpoints (home, user, discussions, directs, comments, likes) all
+  // return a single timeline object; single-post pages omit `timelines`, so
+  // `timeline` is undefined there.
+  const timeline = pageData.timelines?.id ? { id: pageData.timelines.id } : undefined;
+
+  return Response.json({ me, attachments, comments, feeds, posts, users, timeline });
 };
