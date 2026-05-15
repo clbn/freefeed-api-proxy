@@ -201,6 +201,10 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
   // 1. Prepare me
   const me = prepareMe(myData);
 
+  if (token && !myResponse.ok) {
+    return Response.json({ err: myData.err || 'Invalid token' }, { status: myResponse.status });
+  }
+
   // 1.5. Return early on failure
   if (!pageResponse.ok) {
     // Userpage response failed (we receive 404 and send 200), or
@@ -217,8 +221,11 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
       return Response.json({ me, attachments: {}, comments: {}, feeds: {}, posts, users });
     }
 
-    // Other failures (we send 500)
-    throw new Error(pageData.err);
+    // Other failures preserve the upstream status
+    return Response.json(
+      { err: pageData.err || pageResponse.statusText || 'Failed to load page' },
+      { status: pageResponse.status }
+    );
   }
 
   // 2. Prepare page data (except users)
