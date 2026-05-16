@@ -180,7 +180,33 @@ const addSubscriptionInfoToUsers = (users, myData) => {
   });
 }
 
-export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe) => {
+const withoutPostComments = data => {
+  const posts = Array.isArray(data.posts) ? data.posts : [ data.posts ];
+  return {
+    ...data,
+    comments: [],
+    posts: posts.map(p => ({
+      ...p,
+      comments: [],
+      omittedComments: 0,
+      omittedCommentLikes: 0,
+    })),
+  };
+};
+
+const withoutPostLikes = data => {
+  const posts = Array.isArray(data.posts) ? data.posts : [ data.posts ];
+  return {
+    ...data,
+    posts: posts.map(p => ({
+      ...p,
+      likes: [],
+      omittedLikes: 0,
+    })),
+  };
+};
+
+export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe, options = {}) => {
   const headers = { 'Content-Type': 'application/json' };
   if (token) {
     headers['Authorization'] = token;
@@ -192,7 +218,7 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
     justMe ? { json: () => null } : fetch(pageDataUrl, { headers }),
   ]);
 
-  const [myData, statData, pageData] = await Promise.all([
+  let [myData, statData, pageData] = await Promise.all([
     myResponse.json(),
     statResponse.json(),
     pageResponse.json(),
@@ -226,6 +252,13 @@ export const loadAndFormat = async (pageDataUrl, token, username, postId, justMe
       { err: pageData.err || pageResponse.statusText || 'Failed to load page' },
       { status: pageResponse.status }
     );
+  }
+
+  if (options.withoutComments) {
+    pageData = withoutPostComments(pageData);
+  }
+  if (options.withoutLikes) {
+    pageData = withoutPostLikes(pageData);
   }
 
   // 2. Prepare page data (except users)

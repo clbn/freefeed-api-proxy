@@ -49,8 +49,17 @@ app.get('/userlikespage/:username', async ({ req }) => {
 
 app.get('/postpage/:postId', async ({ req }) => {
   const postId = req.param('postId');
-  const maxLikes = req.query('maxLikes');
-  return loadAndFormat(`${config.api.host}/v3/posts/${postId}?maxComments=all&maxLikes=${maxLikes}`, req.header('authorization'), null, postId);
+  const comments = req.query('comments');
+  const likes = req.query('likes');
+  const params = new URLSearchParams();
+  if (comments === 'all') params.set('maxComments', 'all');
+  if (likes === 'all') params.set('maxLikes', 'all');
+  const query = params.toString();
+  const url = `${config.api.host}/v3/posts/${postId}${query ? `?${query}` : ''}`;
+  return loadAndFormat(url, req.header('authorization'), null, postId, false, {
+    withoutComments: comments === 'none',
+    withoutLikes: likes === 'none',
+  });
 });
 
 app.get('/postbacklinkspage/:postId', async ({ req }) => {
